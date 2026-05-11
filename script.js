@@ -1,220 +1,409 @@
+// Register GSAP Plugins
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Preloader Handling
+    // 1. GSAP Preloader & Hero Timeline
+    const mainTl = gsap.timeline();
     const preloader = document.getElementById('preloader');
-    
-    // Minimum display time for preloader to ensure animation finishes
-    const minPreloaderTime = 4500; 
-    const startTime = Date.now();
+    const hero = document.querySelector('.hero');
 
-    const startApp = () => {
-        const elapsedTime = Date.now() - startTime;
-        const remainingTime = Math.max(0, minPreloaderTime - elapsedTime);
+    if (!preloader) return;
 
-        setTimeout(() => {
-            preloader.style.opacity = '0';
-            setTimeout(() => {
-                preloader.style.visibility = 'hidden';
-                // Trigger hero animations after preloader
-                document.querySelectorAll('.hero .parallax-element').forEach((el, index) => {
-                    setTimeout(() => {
-                        el.style.opacity = '1';
-                        el.style.transform = 'translateY(0)';
-                    }, index * 200);
-                });
-            }, 1000);
-        }, remainingTime);
-    };
+    // Initialize Outer layer (12 petals - 30deg steps)
+    for (let i = 1; i <= 12; i++) {
+        gsap.set(`.p${i}`, { rotation: (i - 1) * 30, scale: 0, opacity: 0 });
+    }
+    // Initialize Mid layer (12 petals - 30deg steps starting at 15deg offset)
+    for (let i = 1; i <= 12; i++) {
+        gsap.set(`.pm${i}`, { rotation: (i - 1) * 30 + 15, scale: 0, opacity: 0 });
+    }
+    // Initialize Inner layer (12 petals - 30deg steps starting at 7.5deg offset)
+    for (let i = 1; i <= 12; i++) {
+        gsap.set(`.pi${i}`, { rotation: (i - 1) * 30 + 7.5, scale: 0, opacity: 0 });
+    }
 
-    if (document.readyState === 'complete') {
-        startApp();
-    } else {
-        window.addEventListener('load', startApp);
+    gsap.set('.leaf', { scale: 0, opacity: 0 });
+    gsap.set('.stamen', { scale: 0, opacity: 0, rotation: () => gsap.utils.random(-20, 20) });
+
+    if (hero) {
+        gsap.set('.hero .parallax-element', { opacity: 0, y: 50 });
+        gsap.set('.hero-badge', { opacity: 0, scale: 0.8 });
+        gsap.set('.hero h1 span', { opacity: 0, x: -20 });
+    }
+
+    // Preloader Animation
+    mainTl.to('.petal, .petal-mid, .petal-inner', {
+        scale: 1,
+        opacity: 1,
+        duration: 1,
+        stagger: 0.05,
+        ease: "back.out(1.7)"
+    })
+    .to('.leaf', {
+        scale: 1,
+        opacity: 1,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: "power2.out"
+    }, "-=0.6")
+    .to('.stamen', {
+        scale: 1,
+        opacity: 1,
+        duration: 0.5,
+        stagger: 0.03,
+        ease: "back.out(2)"
+    }, "-=0.4")
+    .to('.flower-center', {
+        opacity: 1,
+        scale: 1,
+        duration: 0.6,
+        ease: "power2.out"
+    }, "-=0.4")
+    .to('.preloader-text', {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: "power3.out"
+    }, "-=0.5")
+    // Exit Preloader
+    .to('#preloader', {
+        opacity: 0,
+        duration: 1,
+        ease: "power2.inOut",
+        delay: 0.5,
+        onComplete: () => {
+            preloader.style.visibility = 'hidden';
+            preloader.style.display = 'none';
+        }
+    });
+
+    if (hero) {
+        mainTl.to('.hero-badge', {
+            opacity: 1,
+            scale: 1,
+            duration: 0.8,
+            ease: "back.out(1.2)"
+        }, "-=0.3")
+        .to('.hero h1', {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: "power4.out"
+        }, "-=0.5")
+        .to('.hero h1 span', {
+            opacity: 1,
+            x: 0,
+            duration: 0.8,
+            ease: "power2.out"
+        }, "-=0.6")
+        .to('.hero-tagline', {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power2.out"
+        }, "-=0.4")
+        .to('.motto-item', {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            stagger: 0.15,
+            ease: "power2.out"
+        }, "-=0.4")
+        .to('.hero-buttons .btn', {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            stagger: 0.2,
+            ease: "back.out(1.7)"
+        }, "-=0.4")
+        .to('.scroll-indicator', {
+            opacity: 1,
+            duration: 1
+        }, "-=0.2");
     }
 
     // 2. Navbar Scroll Effect
     const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 100) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
-    });
+    if (navbar) {
+        ScrollTrigger.create({
+            start: 'top -100',
+            onUpdate: (self) => {
+                if (self.direction === 1) {
+                    navbar.classList.add('scrolled');
+                } else if (self.scroll() < 100) {
+                    navbar.classList.remove('scrolled');
+                }
+            }
+        });
+    }
 
     // 3. Mobile Menu Toggle
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const navLinks = document.getElementById('navLinks');
-    
-    mobileMenuBtn.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-        mobileMenuBtn.textContent = navLinks.classList.contains('active') ? '✕' : '☰';
-    });
 
-    // Close mobile menu on link click
-    document.querySelectorAll('.nav-links a').forEach(link => {
-        link.addEventListener('click', () => {
-            navLinks.classList.remove('active');
-            mobileMenuBtn.textContent = '☰';
+    if (mobileMenuBtn && navLinks) {
+        mobileMenuBtn.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            mobileMenuBtn.textContent = navLinks.classList.contains('active') ? '✕' : '☰';
+            
+            if (navLinks.classList.contains('active')) {
+                gsap.from('.nav-links li', {
+                    x: 50,
+                    opacity: 0,
+                    duration: 0.4,
+                    stagger: 0.1,
+                    ease: "power2.out"
+                });
+            }
+        });
+
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                mobileMenuBtn.textContent = '☰';
+            });
+        });
+    }
+
+    // 4. Parallax Effect with GSAP ScrollTrigger
+    gsap.utils.toArray('.parallax-bg').forEach(bg => {
+        gsap.to(bg, {
+            yPercent: 30,
+            ease: "none",
+            scrollTrigger: {
+                trigger: bg.parentElement,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true
+            }
         });
     });
 
-    // 4. Parallax Effect Logic
-    window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        
-        // Background Parallax
-        const parallaxBgs = document.querySelectorAll('.parallax-bg');
-        parallaxBgs.forEach(bg => {
-            const speed = 0.5;
-            bg.style.transform = `translateY(${scrolled * speed}px)`;
-        });
-
-        // Individual Element Parallax
-        const parallaxElements = document.querySelectorAll('.parallax-element');
-        parallaxElements.forEach(el => {
-            const speed = el.getAttribute('data-speed') || 0.2;
-            const yPos = -(scrolled * speed);
-            // Check if element is in viewport to optimize
-            const rect = el.getBoundingClientRect();
-            if (rect.top < window.innerHeight && rect.bottom > 0) {
-                el.style.transform = `translateY(${yPos}px)`;
+    gsap.utils.toArray('.parallax-element').forEach(el => {
+        const speed = el.getAttribute('data-speed') || 0.2;
+        gsap.to(el, {
+            y: -100 * speed,
+            ease: "none",
+            scrollTrigger: {
+                trigger: el,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true
             }
         });
     });
 
     // 5. 3D Parallax for Cards
-    const cards = document.querySelectorAll('[data-parallax-3d]');
+    const cards = gsap.utils.toArray('[data-parallax-3d]');
     cards.forEach(card => {
         card.addEventListener('mousemove', (e) => {
             const rect = card.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
-            
-            const rotateX = (y - centerY) / 20;
-            const rotateY = (centerX - x) / 20;
-            
-            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-15px)`;
+            const rotateX = (y - centerY) / 15;
+            const rotateY = (centerX - x) / 15;
+
+            gsap.to(card, {
+                rotateX: rotateX,
+                rotateY: rotateY,
+                y: -10,
+                duration: 0.5,
+                ease: "power2.out",
+                overwrite: true
+            });
         });
-        
+
         card.addEventListener('mouseleave', () => {
-            card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)`;
+            gsap.to(card, {
+                rotateX: 0,
+                rotateY: 0,
+                y: 0,
+                duration: 0.8,
+                ease: "elastic.out(1, 0.3)",
+                overwrite: true
+            });
         });
     });
 
-    // 6. Enhanced Scroll Animations
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
+    // 6. Enhanced Scroll Reveals
+    const reveals = gsap.utils.toArray('.reveal-up, .reveal-left, .reveal-right, .reveal-zoom');
+    reveals.forEach(el => {
+        // Set initial positions based on class
+        const startX = el.classList.contains('reveal-left') ? -100 : (el.classList.contains('reveal-right') ? 100 : 0);
+        const startY = el.classList.contains('reveal-up') ? 100 : 0;
+        const startScale = el.classList.contains('reveal-zoom') ? 0.8 : 1;
 
-    const scrollObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                // If it's a staggered container, mark children
-                if (entry.target.classList.contains('stagger-container')) {
-                    const children = entry.target.querySelectorAll('[class*="reveal-"], .fade-in');
-                    children.forEach((child, index) => {
-                        child.style.setProperty('--stagger-index', index);
-                        child.classList.add('reveal-visible', 'visible');
-                    });
-                } else {
-                    entry.target.classList.add('reveal-visible', 'visible');
-                }
-                scrollObserver.unobserve(entry.target);
+        gsap.set(el, { x: startX, y: startY, scale: startScale, opacity: 0 });
+
+        gsap.to(el, {
+            x: 0,
+            y: 0,
+            scale: 1,
+            opacity: 1,
+            duration: 1.2,
+            ease: "power3.out",
+            scrollTrigger: {
+                trigger: el,
+                start: "top 85%",
+                toggleActions: "play none none none"
             }
         });
-    }, observerOptions);
-
-    // Observe all reveal elements and stagger containers
-    document.querySelectorAll('[class*="reveal-"], .fade-in, .stagger-container').forEach(el => {
-        scrollObserver.observe(el);
     });
 
-    // 7. Horizontal Scroll Animation for Blog
-    const blogContainer = document.querySelector('.blog-scroll-container');
-    const blogCards = document.querySelectorAll('.blog-card');
-
-    if (blogContainer) {
-        blogContainer.addEventListener('scroll', () => {
-            // Only apply scroll effects on mobile/tablet (where horizontal scroll is active)
-            if (window.innerWidth > 1024) {
-                blogCards.forEach(card => {
-                    card.classList.remove('in-view', 'off-view');
-                    const img = card.querySelector('img');
-                    if (img) img.style.transform = '';
-                });
-                return;
+    // Stagger containers
+    gsap.utils.toArray('.stagger-container').forEach(container => {
+        const children = container.querySelectorAll('.activity-card, .blog-card');
+        gsap.set(children, { y: 50, opacity: 0 });
+        
+        gsap.to(children, {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: container,
+                start: "top 80%"
             }
+        });
+    });
 
-            const containerRect = blogContainer.getBoundingClientRect();
-            const containerCenter = containerRect.left + containerRect.width / 2;
+    // 7. Blog Section - Responsive Animations
+    const blogSection = document.querySelector('.blog');
+    const blogCardsContainer = document.querySelector('.blog-cards');
+    const blogProgressBar = document.querySelector('.blog-progress-bar');
+    const blogCards = gsap.utils.toArray('.blog-card');
 
-            blogCards.forEach(card => {
-                const cardRect = card.getBoundingClientRect();
-                const cardCenter = cardRect.left + cardRect.width / 2;
-                
-                // Calculate distance from center
-                const distanceFromCenter = Math.abs(containerCenter - cardCenter);
-                const normalizedDistance = Math.min(distanceFromCenter / (containerRect.width / 2), 1);
+    if (blogSection && blogCardsContainer) {
+        let mm = gsap.matchMedia();
 
-                // Apply dynamic effects based on scroll position
-                if (normalizedDistance < 0.3) {
-                    card.classList.add('in-view');
-                    card.classList.remove('off-view');
-                } else {
-                    card.classList.remove('in-view');
-                    card.classList.add('off-view');
-                }
-                
-                // Subtle parallax for card image
-                const img = card.querySelector('img');
-                if (img) {
-                    const moveX = (cardCenter - containerCenter) * 0.1;
-                    img.style.transform = `scale(1.1) translateX(${moveX}px)`;
+        // Mobile/Tablet: Horizontal Pinning Scroll
+        mm.add("(max-width: 1023px)", () => {
+            const getScrollAmount = () => {
+                return -(blogCardsContainer.scrollWidth - window.innerWidth);
+            };
+
+            gsap.to(blogCardsContainer, {
+                x: getScrollAmount,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: blogSection,
+                    start: "top top",
+                    end: () => `+=${blogCardsContainer.scrollWidth}`,
+                    pin: true,
+                    scrub: 1,
+                    invalidateOnRefresh: true,
+                    onUpdate: (self) => {
+                        if (blogProgressBar) {
+                            gsap.to(blogProgressBar, { width: `${self.progress * 100}%`, duration: 0.1 });
+                        }
+                    }
                 }
             });
         });
-        
-        // Initial check for blog cards
-        blogContainer.dispatchEvent(new Event('scroll'));
-        
-        // Handle resize
-        window.addEventListener('resize', () => blogContainer.dispatchEvent(new Event('scroll')));
+
+        // Desktop: Staggered Reveal Grid
+        mm.add("(min-width: 1024px)", () => {
+            gsap.set(blogCards, { y: 100, opacity: 0 });
+            
+            ScrollTrigger.batch(blogCards, {
+                onEnter: batch => gsap.to(batch, { 
+                    opacity: 1, 
+                    y: 0, 
+                    stagger: 0.15, 
+                    duration: 1, 
+                    ease: "power3.out",
+                    overwrite: true 
+                }),
+                start: "top 85%"
+            });
+            
+            // Reset x in case we resized from mobile
+            gsap.set(blogCardsContainer, { x: 0 });
+        });
     }
 
-    // 8. Section Header Parallax
-    window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        document.querySelectorAll('.section-header').forEach(header => {
-            const rect = header.getBoundingClientRect();
-            if (rect.top < window.innerHeight && rect.bottom > 0) {
-                const speed = 0.05;
-                const yPos = (rect.top - window.innerHeight / 2) * speed;
-                header.style.transform = `translateY(${yPos}px)`;
-            }
-        });
+    // Refresh ScrollTrigger on resize to handle dynamic width/height
+    window.addEventListener('resize', () => {
+        ScrollTrigger.refresh();
     });
 
-    // 7. Smooth Scroll for Anchor Links
+    // 8. Smooth Scroll
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
             const targetId = this.getAttribute('href');
             if (targetId === '#') return;
-            
             const target = document.querySelector(targetId);
             if (target) {
-                const navHeight = navbar.offsetHeight;
-                const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navHeight;
-                
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
+                const navHeight = document.getElementById('navbar')?.offsetHeight || 0;
+                gsap.to(window, {
+                    duration: 1.5,
+                    scrollTo: { y: target, offsetY: navHeight },
+                    ease: "power4.inOut"
                 });
             }
+        });
+    });
+
+    // 9. Floating Shapes
+    if (hero) {
+        for (let i = 0; i < 15; i++) {
+            const shape = document.createElement('div');
+            shape.className = 'floating-shape';
+            hero.appendChild(shape);
+            gsap.set(shape, {
+                x: gsap.utils.random(0, window.innerWidth),
+                y: gsap.utils.random(0, window.innerHeight),
+                scale: gsap.utils.random(0.5, 1.5),
+                opacity: gsap.utils.random(0.1, 0.3)
+            });
+            gsap.to(shape, {
+                x: "+=" + gsap.utils.random(-200, 200),
+                y: "+=" + gsap.utils.random(-200, 200),
+                rotation: gsap.utils.random(0, 360),
+                duration: gsap.utils.random(10, 20),
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
+            });
+        }
+    }
+
+    // 10. Custom Cursor
+    const cursor = document.getElementById('custom-cursor');
+    const follower = document.getElementById('cursor-follower');
+    if (cursor && follower) {
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
+            gsap.to(follower, { x: e.clientX, y: e.clientY, duration: 0.3 });
+        });
+        const interactives = document.querySelectorAll('a, button, .activity-card, .blog-card, .btn');
+        interactives.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                follower.classList.add('active');
+                gsap.to(follower, { scale: 2, backgroundColor: 'rgba(192, 57, 43, 0.3)', duration: 0.3 });
+            });
+            el.addEventListener('mouseleave', () => {
+                follower.classList.remove('active');
+                gsap.to(follower, { scale: 1, backgroundColor: 'transparent', duration: 0.3 });
+            });
+        });
+    }
+
+    // 11. Magnetic Effect
+    const magneticBtns = document.querySelectorAll('.btn-primary');
+    magneticBtns.forEach(btn => {
+        btn.addEventListener('mousemove', (e) => {
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            gsap.to(btn, { x: x * 0.3, y: y * 0.3, duration: 0.4, ease: "power2.out" });
+        });
+        btn.addEventListener('mouseleave', () => {
+            gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: "elastic.out(1, 0.3)" });
         });
     });
 });
