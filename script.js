@@ -37,42 +37,35 @@ document.addEventListener('DOMContentLoaded', () => {
     mainTl.to('.flower-center', {
         opacity: 1,
         scale: 1,
-        duration: 0.8,
+        duration: 0.4,
         ease: "back.out(1.7)"
     })
     .to('.petal, .petal-mid, .petal-inner', {
         scale: 1,
         opacity: 1,
-        duration: 1,
-        stagger: 0.05,
-        ease: "back.out(1.7)"
-    }, "-=0.2")
-    .to('.leaf', {
-        scale: 1,
-        opacity: 1,
         duration: 0.6,
-        stagger: 0.1,
-        ease: "power2.out"
-    }, "-=0.6")
-    .to('.stamen', {
+        stagger: 0.02,
+        ease: "back.out(1.5)"
+    }, "-=0.1")
+    .to('.leaf, .stamen', {
         scale: 1,
         opacity: 1,
-        duration: 0.5,
-        stagger: 0.03,
-        ease: "back.out(2)"
+        duration: 0.4,
+        stagger: 0.02,
+        ease: "power2.out"
     }, "-=0.4")
     .to('.preloader-text', {
         opacity: 1,
         y: 0,
-        duration: 1,
+        duration: 0.6,
         ease: "power3.out"
-    }, "-=0.5")
+    }, "-=0.3")
     // Exit Preloader
     .to('#preloader', {
         opacity: 0,
-        duration: 1,
+        duration: 0.6,
         ease: "power2.inOut",
-        delay: 0.5,
+        delay: 0.2,
         onComplete: () => {
             preloader.style.visibility = 'hidden';
             preloader.style.display = 'none';
@@ -80,47 +73,41 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (hero) {
-        mainTl.to('.hero-badge', {
-            opacity: 1,
-            scale: 1,
-            duration: 0.8,
-            ease: "back.out(1.2)"
-        }, "-=0.3")
-        .to('.hero h1', {
+        mainTl.to('.hero h1', {
             opacity: 1,
             y: 0,
-            duration: 1,
+            duration: 0.8,
             ease: "power4.out"
-        }, "-=0.5")
+        }, "-=0.3")
         .to('.hero h1 span', {
             opacity: 1,
             x: 0,
-            duration: 0.8,
+            duration: 0.6,
             ease: "power2.out"
-        }, "-=0.6")
+        }, "-=0.5")
         .to('.hero-tagline', {
             opacity: 1,
             y: 0,
-            duration: 0.8,
+            duration: 0.6,
             ease: "power2.out"
         }, "-=0.4")
         .to('.motto-item', {
             opacity: 1,
             y: 0,
-            duration: 0.6,
-            stagger: 0.15,
+            duration: 0.5,
+            stagger: 0.1,
             ease: "power2.out"
-        }, "-=0.4")
+        }, "-=0.3")
         .to('.hero-buttons .btn', {
             opacity: 1,
             y: 0,
-            duration: 0.6,
-            stagger: 0.2,
-            ease: "back.out(1.7)"
-        }, "-=0.4")
+            duration: 0.5,
+            stagger: 0.15,
+            ease: "back.out(1.5)"
+        }, "-=0.3")
         .to('.scroll-indicator', {
             opacity: 1,
-            duration: 1
+            duration: 0.8
         }, "-=0.2");
     }
 
@@ -195,39 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 5. 3D Parallax for Cards
-    const cards = gsap.utils.toArray('[data-parallax-3d]');
-    cards.forEach(card => {
-        card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            const rotateX = (y - centerY) / 15;
-            const rotateY = (centerX - x) / 15;
 
-            gsap.to(card, {
-                rotateX: rotateX,
-                rotateY: rotateY,
-                y: -10,
-                duration: 0.5,
-                ease: "power2.out",
-                overwrite: true
-            });
-        });
-
-        card.addEventListener('mouseleave', () => {
-            gsap.to(card, {
-                rotateX: 0,
-                rotateY: 0,
-                y: 0,
-                duration: 0.8,
-                ease: "elastic.out(1, 0.3)",
-                overwrite: true
-            });
-        });
-    });
 
     // 6. Enhanced Scroll Reveals
     const reveals = gsap.utils.toArray('.reveal-up, .reveal-left, .reveal-right, .reveal-zoom');
@@ -350,62 +305,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 9. Floating Shapes
-    if (hero) {
-        for (let i = 0; i < 15; i++) {
-            const shape = document.createElement('div');
-            shape.className = 'floating-shape';
-            hero.appendChild(shape);
-            gsap.set(shape, {
-                x: gsap.utils.random(0, window.innerWidth),
-                y: gsap.utils.random(0, window.innerHeight),
-                scale: gsap.utils.random(0.5, 1.5),
-                opacity: gsap.utils.random(0.1, 0.3)
-            });
-            gsap.to(shape, {
-                x: "+=" + gsap.utils.random(-200, 200),
-                y: "+=" + gsap.utils.random(-200, 200),
-                rotation: gsap.utils.random(0, 360),
-                duration: gsap.utils.random(10, 20),
-                repeat: -1,
-                yoyo: true,
-                ease: "sine.inOut"
-            });
-        }
-    }
 
-    // 10. Custom Cursor
-    const cursor = document.getElementById('custom-cursor');
-    const follower = document.getElementById('cursor-follower');
-    if (cursor && follower) {
-        document.addEventListener('mousemove', (e) => {
-            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
-            gsap.to(follower, { x: e.clientX, y: e.clientY, duration: 0.3 });
-        });
-        const interactives = document.querySelectorAll('a, button, .activity-card, .blog-card, .btn');
-        interactives.forEach(el => {
-            el.addEventListener('mouseenter', () => {
-                follower.classList.add('active');
-                gsap.to(follower, { scale: 2, backgroundColor: 'rgba(192, 57, 43, 0.3)', duration: 0.3 });
-            });
-            el.addEventListener('mouseleave', () => {
-                follower.classList.remove('active');
-                gsap.to(follower, { scale: 1, backgroundColor: 'transparent', duration: 0.3 });
-            });
-        });
-    }
-
-    // 11. Magnetic Effect
-    const magneticBtns = document.querySelectorAll('.btn-primary');
-    magneticBtns.forEach(btn => {
-        btn.addEventListener('mousemove', (e) => {
-            const rect = btn.getBoundingClientRect();
-            const x = e.clientX - rect.left - rect.width / 2;
-            const y = e.clientY - rect.top - rect.height / 2;
-            gsap.to(btn, { x: x * 0.3, y: y * 0.3, duration: 0.4, ease: "power2.out" });
-        });
-        btn.addEventListener('mouseleave', () => {
-            gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: "elastic.out(1, 0.3)" });
-        });
-    });
 });
