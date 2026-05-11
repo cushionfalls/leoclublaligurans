@@ -31,14 +31,22 @@ document.addEventListener('DOMContentLoaded', () => {
         gsap.set('.hero h1 span', { opacity: 0, x: -20 });
     }
 
+    gsap.set('.flower-center', { scale: 0, opacity: 0 });
+
     // Preloader Animation
-    mainTl.to('.petal, .petal-mid, .petal-inner', {
+    mainTl.to('.flower-center', {
+        opacity: 1,
+        scale: 1,
+        duration: 0.8,
+        ease: "back.out(1.7)"
+    })
+    .to('.petal, .petal-mid, .petal-inner', {
         scale: 1,
         opacity: 1,
         duration: 1,
         stagger: 0.05,
         ease: "back.out(1.7)"
-    })
+    }, "-=0.2")
     .to('.leaf', {
         scale: 1,
         opacity: 1,
@@ -52,12 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
         duration: 0.5,
         stagger: 0.03,
         ease: "back.out(2)"
-    }, "-=0.4")
-    .to('.flower-center', {
-        opacity: 1,
-        scale: 1,
-        duration: 0.6,
-        ease: "power2.out"
     }, "-=0.4")
     .to('.preloader-text', {
         opacity: 1,

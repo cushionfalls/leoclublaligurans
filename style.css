@@ -690,8 +690,8 @@ section {
 
 .activities-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2.5rem;
     max-width: 1300px;
     margin: 0 auto;
 }
@@ -703,11 +703,15 @@ section {
     overflow: hidden;
     transition: var(--transition);
     perspective: 1000px;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .card-img-container {
-    height: 250px;
+    height: 42%;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .card-img-container img {
@@ -722,31 +726,27 @@ section {
 }
 
 .card-content {
-    padding: 3rem;
+    padding: 1.5rem 1.8rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-.activity-logo {
-    height: 60px;
-    width: auto;
-    margin-bottom: 2rem;
-    display: block;
-    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.2));
-    transition: var(--transition);
-}
 
-.activity-card:hover .activity-logo {
-    transform: scale(1.1);
-}
 
 .activity-card h3 {
-    font-size: 1.8rem;
-    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+    margin-bottom: 0.6rem;
     color: var(--gold);
+    line-height: 1.3;
 }
 
 .activity-card p {
     color: rgba(253, 251, 247, 0.7);
-    font-size: 1rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    margin: 0;
 }
 
 .activity-card:hover {
