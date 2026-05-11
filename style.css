@@ -60,7 +60,7 @@ h1, h2, h3, h4 {
     display: flex;
     justify-content: center;
     align-items: center;
-    transform: scale(1);
+    transform: scale(clamp(0.6, 1vw + 0.5, 1));
 }
 @media (max-width: 480px) {
     .flower-container { transform: scale(0.8); }
@@ -628,8 +628,8 @@ section {
 
 .activities-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
     max-width: 1300px;
     margin: 0 auto;
 }
@@ -722,6 +722,8 @@ section {
     overflow: hidden;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
     transition: var(--transition);
+    display: flex;
+    flex-direction: column;
 }
 
 @media (max-width: 768px) {
@@ -755,6 +757,9 @@ section {
 
 .blog-card-content {
     padding: 2.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .blog-tag {
@@ -778,6 +783,7 @@ section {
     color: var(--saffron);
     font-weight: 600;
     margin-bottom: 2rem;
+    flex-grow: 1;
 }
 
 .read-more {
@@ -1066,16 +1072,48 @@ footer {
     margin-bottom: 1rem;
 }
 
-/* Animations */
-.fade-in {
+/* Reveal on Scroll Animations */
+[class*="reveal-"] {
     opacity: 0;
-    transform: translateY(50px);
-    transition: opacity 1s ease-out, transform 1s ease-out;
+    transition: all 1.2s cubic-bezier(0.2, 1, 0.3, 1);
+    will-change: transform, opacity;
 }
 
-.fade-in.visible {
-    opacity: 1;
-    transform: translateY(0);
+.reveal-up, .fade-in { transform: translateY(80px); }
+.reveal-down { transform: translateY(-80px); }
+.reveal-left { transform: translateX(-80px); }
+.reveal-right { transform: translateX(80px); }
+.reveal-zoom { transform: scale(0.9); }
+
+.reveal-visible, .fade-in.visible {
+    opacity: 1 !important;
+    transform: translate(0, 0) scale(1) !important;
+}
+
+/* Stagger Delay System */
+.stagger-container .reveal-visible {
+    transition-delay: calc(var(--stagger-index) * 0.1s);
+}
+
+/* Blog Horizontal Scroll Enhancement */
+.blog-card {
+    transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.6s ease;
+    transform-origin: center center;
+}
+
+.blog-card.in-view {
+    transform: scale(1.05);
+    z-index: 2;
+}
+
+.blog-card.off-view {
+    transform: scale(0.95) rotateY(5deg);
+    opacity: 0.7;
+}
+
+/* Section Header Scroll Parallax */
+.section-header {
+    transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1);
 }
 
 /* Mobile Responsive */
@@ -1088,6 +1126,28 @@ footer {
     .footer-grid {
         grid-template-columns: 1fr;
         gap: 4rem;
+    }
+}
+
+/* Desktop Grid for Blog */
+@media (min-width: 1025px) {
+    .blog-scroll-container {
+        overflow: visible;
+        padding: 4rem 0;
+    }
+    
+    .blog-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 3rem;
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 0;
+    }
+    
+    .blog-card {
+        width: 100%;
+        min-width: auto;
     }
 }
 
@@ -1148,9 +1208,18 @@ footer {
     }
 
     .motto-item {
-        padding: 1.2rem;
+        padding: 1rem;
         width: 100%;
         text-align: center;
+        border-radius: 12px;
+    }
+
+    .motto-item strong {
+        font-size: 1.1rem;
+    }
+
+    .motto-item span {
+        font-size: 0.75rem;
     }
 
     /* Center Activity Section */
@@ -1233,18 +1302,49 @@ footer {
 
 @media (max-width: 480px) {
     .hero h1 {
-        font-size: 1.8rem;
+        font-size: clamp(1.8rem, 10vw, 2.5rem);
     }
     
     .hero-tagline {
         font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .hero-badge {
+        font-size: 0.7rem;
+        padding: 0.4rem 1.2rem;
+        letter-spacing: 2px;
     }
     
     .join h2 {
-        font-size: 1.8rem;
+        font-size: 2rem;
     }
     
     .join p {
+        font-size: 1.1rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.8rem;
+    }
+
+    .btn {
+        padding: 0.8rem 1.5rem;
         font-size: 1rem;
+    }
+}
+
+/* Extra small devices fix */
+@media (max-width: 340px) {
+    .logo span {
+        display: none; /* Only show icon on very small screens to prevent overlap */
+    }
+    
+    .blog-card {
+        width: 85vw;
+    }
+    
+    .btn {
+        font-size: 0.9rem;
     }
 }

@@ -104,24 +104,98 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 6. Intersection Observer for Fade-in Animations
+    // 6. Enhanced Scroll Animations
     const observerOptions = {
-        threshold: 0.15,
-        rootMargin: '0px 0px -100px 0px'
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
     };
 
-    const observer = new IntersectionObserver((entries) => {
+    const scrollObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                // Once visible, we can stop observing
-                observer.unobserve(entry.target);
+                // If it's a staggered container, mark children
+                if (entry.target.classList.contains('stagger-container')) {
+                    const children = entry.target.querySelectorAll('[class*="reveal-"], .fade-in');
+                    children.forEach((child, index) => {
+                        child.style.setProperty('--stagger-index', index);
+                        child.classList.add('reveal-visible', 'visible');
+                    });
+                } else {
+                    entry.target.classList.add('reveal-visible', 'visible');
+                }
+                scrollObserver.unobserve(entry.target);
             }
         });
     }, observerOptions);
 
-    document.querySelectorAll('.fade-in').forEach(el => {
-        observer.observe(el);
+    // Observe all reveal elements and stagger containers
+    document.querySelectorAll('[class*="reveal-"], .fade-in, .stagger-container').forEach(el => {
+        scrollObserver.observe(el);
+    });
+
+    // 7. Horizontal Scroll Animation for Blog
+    const blogContainer = document.querySelector('.blog-scroll-container');
+    const blogCards = document.querySelectorAll('.blog-card');
+
+    if (blogContainer) {
+        blogContainer.addEventListener('scroll', () => {
+            // Only apply scroll effects on mobile/tablet (where horizontal scroll is active)
+            if (window.innerWidth > 1024) {
+                blogCards.forEach(card => {
+                    card.classList.remove('in-view', 'off-view');
+                    const img = card.querySelector('img');
+                    if (img) img.style.transform = '';
+                });
+                return;
+            }
+
+            const containerRect = blogContainer.getBoundingClientRect();
+            const containerCenter = containerRect.left + containerRect.width / 2;
+
+            blogCards.forEach(card => {
+                const cardRect = card.getBoundingClientRect();
+                const cardCenter = cardRect.left + cardRect.width / 2;
+                
+                // Calculate distance from center
+                const distanceFromCenter = Math.abs(containerCenter - cardCenter);
+                const normalizedDistance = Math.min(distanceFromCenter / (containerRect.width / 2), 1);
+
+                // Apply dynamic effects based on scroll position
+                if (normalizedDistance < 0.3) {
+                    card.classList.add('in-view');
+                    card.classList.remove('off-view');
+                } else {
+                    card.classList.remove('in-view');
+                    card.classList.add('off-view');
+                }
+                
+                // Subtle parallax for card image
+                const img = card.querySelector('img');
+                if (img) {
+                    const moveX = (cardCenter - containerCenter) * 0.1;
+                    img.style.transform = `scale(1.1) translateX(${moveX}px)`;
+                }
+            });
+        });
+        
+        // Initial check for blog cards
+        blogContainer.dispatchEvent(new Event('scroll'));
+        
+        // Handle resize
+        window.addEventListener('resize', () => blogContainer.dispatchEvent(new Event('scroll')));
+    }
+
+    // 8. Section Header Parallax
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        document.querySelectorAll('.section-header').forEach(header => {
+            const rect = header.getBoundingClientRect();
+            if (rect.top < window.innerHeight && rect.bottom > 0) {
+                const speed = 0.05;
+                const yPos = (rect.top - window.innerHeight / 2) * speed;
+                header.style.transform = `translateY(${yPos}px)`;
+            }
+        });
     });
 
     // 7. Smooth Scroll for Anchor Links
