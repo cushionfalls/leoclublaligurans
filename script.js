@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const preloader = document.getElementById('preloader');
     
     // Minimum display time for preloader to ensure animation finishes
-    const minPreloaderTime = 3500; 
+    const minPreloaderTime = 4500; 
     const startTime = Date.now();
 
     const startApp = () => {
